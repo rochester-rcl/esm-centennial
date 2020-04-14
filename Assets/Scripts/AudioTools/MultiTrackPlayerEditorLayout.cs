@@ -16,7 +16,9 @@ namespace AudioTools
 
         private int buttonWidth = 100;
         private Rect lastRect;
-
+        private List<AudioTrack> serializedTracks;
+        private Color defaultColor = new Color(0.9f, 0.9f, 0.9f);
+        private Color darkColor = new Color(0.4f, 0.4f, 0.4f);
         public void OnEnable()
         {
             tracks = serializedObject.FindProperty("tracks");
@@ -26,37 +28,75 @@ namespace AudioTools
             output = serializedObject.FindProperty("output");
         }
 
+        private void UpdateSerializedAudioTrack(ref SerializedProperty track)
+        {
+            SerializedObject so = new SerializedObject(track.objectReferenceValue);
+            SerializedProperty title = so.FindProperty("title");
+            SerializedProperty clip = so.FindProperty("clip");
+            EditorGUILayout.BeginVertical();
+            {
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.LabelField("Title");
+                    EditorGUILayout.LabelField("Audio Clip");
+                }
+                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.BeginHorizontal();
+                {
+                    EditorGUILayout.PropertyField(title, GUIContent.none);
+                    EditorGUILayout.PropertyField(clip, GUIContent.none);
+                }
+                EditorGUILayout.EndHorizontal();
+            }
+            EditorGUILayout.EndVertical();
+            GUILayout.Space(5);
+            so.ApplyModifiedProperties();
+        }
+
+        private void SetDefaultAudioTrack(ref SerializedProperty track)
+        {
+            AudioTrack at = ScriptableObject.CreateInstance<AudioTrack>();
+            track.objectReferenceValue = at;
+        }
+
         private void DrawTracks()
         {
-            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
+            EditorGUILayout.BeginHorizontal();
             {
                 EditorGUILayout.LabelField("Audio Tracks", EditorStyles.largeLabel);
                 if (GUILayout.Button("Add", GUILayout.Width(buttonWidth)))
                 {
                     trackArraySize.intValue++;
-                    tracks.GetArrayElementAtIndex(trackArraySize.intValue - 1).objectReferenceValue = null;
+                    SerializedProperty t = tracks.GetArrayElementAtIndex(trackArraySize.intValue - 1);
+                    SetDefaultAudioTrack(ref t);
                 }
-                EditorGUI.indentLevel++;
+            }
+            EditorGUILayout.EndHorizontal();
+            GUILayout.Space(10);
+            GUI.backgroundColor = darkColor;
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            GUI.backgroundColor = defaultColor;
+            for (int i = 0; i < trackArraySize.intValue; i++)
+            {
+                // GUI.backgroundColor = defaultColor;
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                 {
-                    for (int i = 0; i < trackArraySize.intValue; i++)
+                    SerializedProperty track = tracks.GetArrayElementAtIndex(i);
+                    UpdateSerializedAudioTrack(ref track);
+                    EditorGUILayout.BeginHorizontal();
                     {
-                        SerializedProperty track = tracks.GetArrayElementAtIndex(i);
-                        EditorGUILayout.BeginHorizontal();
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Button("Remove", GUILayout.Width(buttonWidth)))
                         {
-                            string label = string.Format("Track {0}", i.ToString());
-                            EditorGUILayout.PropertyField(track, new GUIContent(label));
-                            if (GUILayout.Button("Remove", GUILayout.Width(buttonWidth)))
-                            {
-                                track.objectReferenceValue = null;
-                                tracks.DeleteArrayElementAtIndex(i);
-                            }
+                            track.objectReferenceValue = null;
+                            tracks.DeleteArrayElementAtIndex(i);
                         }
-                        EditorGUILayout.EndHorizontal();
                     }
+                    EditorGUILayout.EndHorizontal();
                 }
                 EditorGUILayout.EndVertical();
-                EditorGUI.indentLevel--;
+                GUILayout.Space(10);
             }
             EditorGUILayout.EndVertical();
         }

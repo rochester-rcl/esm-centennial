@@ -7,14 +7,15 @@ namespace AudioTools
 {
     public class MultiTrackPlayer : MonoBehaviour
     {
-        public AudioClip[] tracks;
+        public AudioTrack[] tracks;
         public bool loop;
         public bool playOnAwake;
         public AudioMixerGroup output;
+        private AudioMixer mixer;
         // Start is called before the first frame update
         void Start()
         {
-            
+
         }
 
         void Awake()
@@ -24,10 +25,10 @@ namespace AudioTools
 
         private void AttachAudioSources()
         {
-            foreach (AudioClip track in tracks)
+            foreach (AudioTrack track in tracks)
             {
                 AudioSource source = gameObject.AddComponent<AudioSource>();
-                source.clip = track;
+                source.clip = track.clip;
                 source.loop = loop;
                 source.outputAudioMixerGroup = output;
                 if (playOnAwake) source.Play();
