@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
-
+using System;
 namespace AudioTools
 {
     public class MultiTrackPlayer : MonoBehaviour
@@ -11,20 +11,60 @@ namespace AudioTools
         public bool loop;
         public bool playOnAwake;
         public AudioMixerGroup output;
+        public AudioSource SelectedSource
+        {
+            get
+            {
+                return selectedSource;
+            }
+        }
+        private AudioSource selectedSource;
+        private Dictionary<string, AudioSource> sources;
+
         private AudioMixer mixer;
+
         // Start is called before the first frame update
         void Start()
         {
 
         }
 
-        void Awake()
+        public void Awake()
         {
             AttachAudioSources();
         }
 
+        public void SelectSource(string trackName)
+        {
+            AudioSource src = sources[trackName];
+            if (src != null)
+            {
+                selectedSource = src;
+            } else {
+                Debug.LogWarning(string.Format("Audio Source with Title {0} not found!", trackName));
+            }
+        }
+
+        public void BypassMixerGroup()
+        {
+            if (selectedSource)
+            {
+                selectedSource.outputAudioMixerGroup = null;
+            }
+        }
+
+        public void BypassMixerGroup(string trackName)
+        {
+            SelectSource(trackName);
+            if (selectedSource)
+            {
+                BypassMixerGroup();
+            }
+        }
+
         private void AttachAudioSources()
         {
+            sources = new Dictionary<string, AudioSource>();
             foreach (AudioTrack track in tracks)
             {
                 AudioSource source = gameObject.AddComponent<AudioSource>();
@@ -32,6 +72,7 @@ namespace AudioTools
                 source.loop = loop;
                 source.outputAudioMixerGroup = output;
                 if (playOnAwake) source.Play();
+                sources[track.title] = source;
             }
         }
 
