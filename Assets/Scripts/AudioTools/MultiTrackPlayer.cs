@@ -18,15 +18,17 @@ namespace AudioTools
                 return selectedSource;
             }
         }
+
         private AudioSource selectedSource;
         private Dictionary<string, AudioSource> sources;
 
         private AudioMixer mixer;
+        private OutputMapping mapper;
 
         // Start is called before the first frame update
         void Start()
         {
-
+            mapper = gameObject.GetComponent<OutputMapping>();
         }
 
         public void Awake()
@@ -36,12 +38,21 @@ namespace AudioTools
 
         public void SelectSource(string trackName)
         {
-            AudioSource src = sources[trackName];
-            if (src != null)
+            if (string.IsNullOrEmpty(trackName))
             {
-                selectedSource = src;
-            } else {
-                Debug.LogWarning(string.Format("Audio Source with Title {0} not found!", trackName));
+                selectedSource = null;
+            }
+            else
+            {
+                AudioSource src = sources[trackName];
+                if (src != null)
+                {
+                    selectedSource = src;
+                }
+                else
+                {
+                    Debug.LogWarning(string.Format("Audio Source with Title {0} not found!", trackName));
+                }
             }
         }
 
@@ -50,6 +61,23 @@ namespace AudioTools
             if (selectedSource)
             {
                 selectedSource.outputAudioMixerGroup = null;
+            }
+        }
+
+        public void Mute()
+        {
+            if (selectedSource)
+            {
+                selectedSource.mute = true;
+            }
+        }
+
+        public void Mute(string trackName)
+        {
+            SelectSource(trackName);
+            if (selectedSource)
+            {
+                Mute();
             }
         }
 
