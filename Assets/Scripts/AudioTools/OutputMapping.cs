@@ -14,7 +14,7 @@ namespace AudioTools
         public Component selectedComponent;
         public string selectedProp;
         public string propType;
-        private object output;
+        private PropertyInfo output;
         private System.Type pType;
 
         // Start is called before the first frame update
@@ -26,7 +26,7 @@ namespace AudioTools
         // Update is called once per frame
         void Update()
         {
-
+            
         }
 
         private void SetOutput()
@@ -43,9 +43,10 @@ namespace AudioTools
         public T GetOutputAs<T>()
         {
             System.Type t = typeof(T);
+            object value = output.GetValue(selectedComponent);
             if (pType.Equals(t))
             {
-                return (T)System.Convert.ChangeType(output, t);
+                return (T)value;
             }
             throw new System.Exception(string.Format("Cannot Cast output to {0}", t.Name));
         }

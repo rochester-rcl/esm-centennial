@@ -29,6 +29,7 @@ namespace AudioTools
         void Start()
         {
             mapper = gameObject.GetComponent<OutputMapping>();
+            Debug.Log(mapper.GetOutputAs<Vector3>());
         }
 
         public void Awake()

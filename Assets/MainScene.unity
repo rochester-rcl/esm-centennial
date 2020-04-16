@@ -878,6 +878,7 @@ MonoBehaviour:
   selectedPropIndex: 0
   selectedComponent: {fileID: 638532733}
   selectedProp: position
+  propType: UnityEngine.Vector3, UnityEngine
 --- !u!1 &1456746168
 GameObject:
   m_ObjectHideFlags: 0
